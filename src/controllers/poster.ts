@@ -31,4 +31,11 @@ const createPoster = async (req: Request, res: Response) => {
   }
 };
 
-export default createPoster;
+const getPoster = async (req: Request, res: Response) => {
+  try {
+    const posters = await Poster.find();
+    return res.status(200).json(posters);
+  } catch (error) {}
+};
+
+export { createPoster, getPoster };

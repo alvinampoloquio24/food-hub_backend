@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const connectToDatabase = async () => {
   console.log("Starting database connection...");
   try {
-    const uri = "mongodb://127.0.0.1:27017/food-hub";
+    const uri = process.env.MONGODB_URL!;
 
     // Connect to MongoDB
     await mongoose.connect(uri);
