@@ -21,6 +21,9 @@ const posterSchema: Schema = new Schema({
   time: {
     type: String,
   },
+  cal: {
+    type: String,
+  },
   dishType: {
     type: String,
   },
