@@ -3,6 +3,7 @@ import connectToDatabase from "./config/db";
 import poster from "./router/poster";
 import cors from "cors";
 import errorHandler from "./middleware/errorHandler";
+import user from "./router/user";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,6 +14,7 @@ app.use(cors()); // Use cors() as a function
 connectToDatabase();
 
 app.use(poster);
+app.use(user);
 app.use(errorHandler);
 
 // Start the server

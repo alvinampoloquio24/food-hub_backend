@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from "express";
+import { TokenExpiredError } from "jsonwebtoken";
 
 interface CustomError extends Error {
   status?: number;
   kind?: string;
+  code?: number;
+  keyPattern?: { [key: string]: any };
 }
 
 const errorHandler = (
@@ -16,6 +19,7 @@ const errorHandler = (
     error.message = "Invalid data format";
     error.status = 400; // Bad Request
   }
+
   // Checking for Mongoose cast error (commonly occurs with an invalid ObjectId)
   else if (error.name === "CastError" && error.kind === "ObjectId") {
     error.message = "Invalid ID format";
@@ -29,7 +33,11 @@ const errorHandler = (
     error.message = "Invalid token";
     error.status = 400; // Bad Request
   }
-  // You might want to handle any other specific Mongoose errors or general errors here
+  // Handling duplicate key error (e.g., duplicate email)
+  else if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
+    error.message = "Email already exists";
+    error.status = 400; // Bad Request
+  }
 
   // Final error response
   const errMessage = error.message || "Something went wrong";
