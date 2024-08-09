@@ -13,10 +13,11 @@ import {
   getGeneratedRecipe,
   getRecipeInformation,
 } from "../controllers/spoonacular";
+import auth from "../middleware/auth";
 const router = express.Router();
 
 // Define the POST route for creating a new poster
-router.post("/addArticle", upload.single("image"), createArticle);
+router.post("/addArticle", upload.single("image"), auth, createArticle);
 
 router.post("/addPoster", upload.single("image"), createPoster);
 router.get("/getPosters", getPoster);

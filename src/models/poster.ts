@@ -8,26 +8,29 @@ interface Iposter extends Document {
   dishType: string;
 }
 
-const posterSchema: Schema = new Schema({
-  img: {
-    type: String,
+const posterSchema: Schema = new Schema(
+  {
+    img: {
+      type: String,
+    },
+    description: {
+      type: String,
+    },
+    name: {
+      type: String,
+    },
+    time: {
+      type: String,
+    },
+    cal: {
+      type: String,
+    },
+    dishType: {
+      type: String,
+    },
   },
-  description: {
-    type: String,
-  },
-  name: {
-    type: String,
-  },
-  time: {
-    type: String,
-  },
-  cal: {
-    type: String,
-  },
-  dishType: {
-    type: String,
-  },
-});
+  { timestamps: true }
+);
 
 const posterModel = mongoose.model<Iposter>("Poster", posterSchema);
 

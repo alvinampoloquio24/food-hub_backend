@@ -3,6 +3,14 @@ import brypt from "bcrypt";
 import User from "../models/user";
 import sendAccountCreationEmail from "../email/sendEmail";
 import { createToken, verifyTokenEmail } from "../helper/token";
+import { request } from "http";
+import cloudinary from "../config/cloudinary";
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+  };
+}
 const createAccount = async (
   req: Request,
   res: Response,
@@ -79,5 +87,39 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     return next(error);
   }
 };
-const UserController = { createAccount, verifyEmailToken, login };
+const updateUser = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.user?.userId;
+
+    if (!id) {
+      return res.status(401).json({
+        message: "Unauthenticated Request",
+      });
+    }
+
+    let updateData = { ...req.body };
+
+    if (req.file) {
+      // Upload image to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path);
+      updateData.profile = result.secure_url;
+    }
+
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const UserController = { createAccount, verifyEmailToken, login, updateUser };
 export default UserController;

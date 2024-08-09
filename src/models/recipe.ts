@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 interface IIngredient {
   name: string;
   quantity: string;
+  unit: string;
 }
 interface Idirection {
   tittle: string;
@@ -24,6 +25,9 @@ const ingredientSchema: Schema = new Schema({
     type: String,
     required: true,
   },
+  unit: {
+    type: String,
+  },
 });
 const directionSchema: Schema = new Schema({
   title: {
@@ -36,18 +40,21 @@ const directionSchema: Schema = new Schema({
   },
 });
 
-const recipeSchema: Schema = new Schema({
-  dishId: { type: mongoose.Schema.Types.ObjectId, ref: "Poster" },
-  ingredients: {
-    type: [ingredientSchema],
-    required: true,
+const recipeSchema: Schema = new Schema(
+  {
+    dishId: { type: mongoose.Schema.Types.ObjectId, ref: "Poster" },
+    ingredients: {
+      type: [ingredientSchema],
+      required: true,
+    },
+    directions: {
+      type: [directionSchema],
+      required: true,
+      unique: true,
+    },
   },
-  directions: {
-    type: [directionSchema],
-    required: true,
-    unique: true,
-  },
-});
+  { timestamps: true }
+);
 
 // Adding a unique index on dishId to enforce uniqueness
 recipeSchema.index({ dishId: 1 }, { unique: true });
