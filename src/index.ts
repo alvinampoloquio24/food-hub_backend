@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import connectToDatabase from "./config/db";
-import poster from "./router/poster";
+import recipe from "./router/recipe";
 import cors from "cors";
 import errorHandler from "./middleware/errorHandler";
 import user from "./router/user";
@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(cors()); // Use cors() as a function
 connectToDatabase();
 
-app.use(poster);
+app.use(recipe);
 app.use(user);
 app.use(errorHandler);
 

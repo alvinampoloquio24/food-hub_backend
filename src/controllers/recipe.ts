@@ -1,29 +1,56 @@
 import { NextFunction, Request, Response } from "express";
 import Recipe from "../models/recipe"; // Adjust the import path as needed
-import PosterService from "../services.ts/poster";
-import mongoose from "mongoose";
+import cloudinary from "../config/cloudinary";
 
-const addRecipe = async (req: Request, res: Response, next: NextFunction) => {
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+  };
+}
+const postRecipe = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const id = req.params.id;
+    if (!req.file) {
+      console.log("no file");
+      return res.status(400).json({ message: "No file uploaded" });
+    }
 
-    const poster = await PosterService.findPoster(id);
-    console.log(poster);
-    if (!poster) {
-      return res.status(400).json({ message: "No poster in this Id. " });
+    // Upload image to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "posters",
+    });
+
+    let { ingredients, directions, ...otherFields } = req.body;
+
+    // Parse ingredients if it's a string
+    if (typeof ingredients === "string") {
+      ingredients = JSON.parse(ingredients);
+    }
+
+    // Parse directions if it's a string
+    if (typeof directions === "string") {
+      directions = JSON.parse(directions);
+    }
+
+    // Ensure directions is an array of objects
+    if (!Array.isArray(directions)) {
+      return res.status(400).json({ message: "Directions must be an array" });
     }
 
     const recipe = await Recipe.create({
-      dishId: id,
-      ingredients: req.body.ingredients,
-      directions: req.body.directions, // Assuming req.body.ingredients is an array of ingredients
+      ...otherFields,
+      ingredients,
+      directions,
+      img: result.secure_url,
+      userId: req.user?.userId,
     });
-    return res.status(201).json({ message: "Add successfully. ", recipe });
+
+    console.log("asd");
+    return res.status(201).json(recipe);
   } catch (error) {
-    return next(error);
+    console.error("Error creating recipe:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 const updateRecipe = async (
   req: Request,
   res: Response,
@@ -35,16 +62,9 @@ const updateRecipe = async (
     if (!recipe) {
       return res.status(400).json({ message: "No recipe found with this id." });
     }
-    const updatedRecipe = await Recipe.findByIdAndUpdate(
-      recipe._id,
-      {
-        ingredients: req.body.ingredients,
-      },
-      {
-        new: true, // Return the updated document
-        runValidators: true, // Validate the update against the schema
-      }
-    );
+    const updatedRecipe = await Recipe.findByIdAndUpdate(recipe._id, req.body, {
+      new: true,
+    });
     return res
       .status(200)
       .json({ message: "Updated successfully", updatedRecipe });
@@ -52,63 +72,105 @@ const updateRecipe = async (
     return next(error);
   }
 };
-
-const findRecipe = async (req: Request, res: Response, next: NextFunction) => {
+const getRecipes = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const recipe = await Recipe.findById(req.params.id);
-    if (!recipe) {
-      return res.status(400).json({ message: "No recipe in this Id. " });
-    }
-    return res.status(200).json(recipe);
+    const recipes = await Recipe.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "userId",
+        select: "name profile -_id",
+        model: "User",
+      })
+      .lean()
+      .exec();
+    const modifiedRecipes = recipes.map((recipe) => ({
+      ...recipe,
+      user: recipe.userId, // Assign userId to user
+    }));
+
+    return res.status(200).json(modifiedRecipes);
   } catch (error) {
     return next(error);
   }
 };
-const getRecipeByDishId = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const searchRecipeByName = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.query;
+
+    if (!name || typeof name !== "string") {
+      return res
+        .status(400)
+        .json({ error: "Invalid or missing name parameter" });
+    }
+
+    // Create a case-insensitive regex pattern
+    const nameRegex = new RegExp(name, "i");
+
+    // Use the regex in the find query
+    const recipes = await Recipe.find({ name: { $regex: nameRegex } })
+      .populate({
+        path: "userId",
+        select: "name profile -_id",
+        model: "User",
+      })
+      .lean()
+      .exec();
+    const modifiedRecipes = recipes.map((recipe) => ({
+      ...recipe,
+      user: recipe.userId, // Assign userId to user
+    }));
+
+    return res.status(200).json(modifiedRecipes);
+  } catch (error) {
+    console.error("Error searching recipes:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+const searchRecipeId = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
 
-    const dish: any = await PosterService.findPoster(id);
-    if (!dish) {
-      return res.status(200).json({ message: "No poster in this id. " });
-    }
-
-    let recipe: any = await Recipe.findOne({
-      dishId: id,
-    });
-
+    const recipe = await Recipe.findById(id);
     if (!recipe) {
-      return res.status(200).json({ message: "No recipe in this id. " });
+      return res.status(400).json({ message: "No recipe exist in this id. " });
     }
-
-    return res.status(200).json({ recipe: { ...recipe._doc, ...dish._doc } });
+    return res.status(200).json(recipe);
   } catch (error) {
-    return next(error);
+    res.send(error);
   }
 };
-const findAllRecipe = async (
-  req: Request,
+const getSelfRecipes = async (
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const recipes = await Recipe.find();
-    return res.status(200).json(recipes);
+    const recipes = await Recipe.find({ userId: req.user?.userId })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "userId",
+        select: "name profile -_id",
+        model: "User",
+      })
+      .lean()
+      .exec();
+    const modifiedRecipes = recipes.map((recipe) => ({
+      ...recipe,
+      user: recipe.userId, // Assign userId to user
+    }));
+
+    return res.status(200).json(modifiedRecipes);
   } catch (error) {
     return next(error);
   }
 };
-
 const RecipeController = {
-  addRecipe,
   updateRecipe,
-  findRecipe,
-  getRecipeByDishId,
-  findAllRecipe,
+  getRecipes,
+  searchRecipeByName,
+  searchRecipeId,
+  postRecipe,
+  getSelfRecipes,
 };
 
 export default RecipeController;
