@@ -120,6 +120,25 @@ const updateUser = async (
     return next(error);
   }
 };
+const getUser = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.findById(req.user?.userId);
 
-const UserController = { createAccount, verifyEmailToken, login, updateUser };
+    return res.status(200).json(user);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const UserController = {
+  createAccount,
+  verifyEmailToken,
+  login,
+  updateUser,
+  getUser,
+};
 export default UserController;

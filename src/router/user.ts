@@ -7,6 +7,7 @@ const router = express.Router();
 router.post("/createAccount", UserController.createAccount);
 router.post("/login", UserController.login);
 router.post("/verifyEmail/:id", UserController.verifyEmailToken);
+router.get("/getUser", auth, UserController.getUser);
 router.post(
   "/updateUser",
   auth,
