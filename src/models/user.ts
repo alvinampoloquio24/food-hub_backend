@@ -7,6 +7,7 @@ interface IUser extends Document {
   password: string;
   verified: boolean;
   profile: string;
+  coverPhoto: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -34,6 +35,11 @@ const userSchema: Schema = new Schema(
     profile: {
       type: String,
       default: null,
+    },
+    coverPhoto: {
+      type: String,
+      defalut:
+        "https://cdn.pixabay.com/photo/2017/08/05/12/33/flat-lay-2583213_1280.jpg",
     },
   },
   {

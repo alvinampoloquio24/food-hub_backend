@@ -11,7 +11,7 @@ router.get("/getUser", auth, UserController.getUser);
 router.post(
   "/updateUser",
   auth,
-  upload.single("image"),
+  upload.fields([{ name: "profile" }, { name: "coverPhoto" }]),
   UserController.updateUser
 );
 

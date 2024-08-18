@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import Recipe from "../models/recipe"; // Adjust the import path as needed
 import cloudinary from "../config/cloudinary";
+import mongoose from "mongoose";
+import User from "../models/user";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -52,24 +54,32 @@ const postRecipe = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 const updateRecipe = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id;
-    const recipe = await Recipe.findById(id); // Ensuring uniqueness check
-    if (!recipe) {
-      return res.status(400).json({ message: "No recipe found with this id." });
+    const { id } = req.params;
+    const recipeData = req.body;
+
+    // Check if a new image was uploaded
+    if (req.file) {
+      const imageUrl = await cloudinary.uploader.upload(req.file.path); // Upload the image and get the URL
+      recipeData.img = imageUrl.secure_url; // Update the image field with the new URL
     }
-    const updatedRecipe = await Recipe.findByIdAndUpdate(recipe._id, req.body, {
+
+    // Update recipe in the database (ensure to exclude updating image if not provided)
+    const updatedRecipe = await Recipe.findByIdAndUpdate(id, recipeData, {
       new: true,
     });
-    return res
-      .status(200)
-      .json({ message: "Updated successfully", updatedRecipe });
+
+    if (!updatedRecipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    return res.status(200).json(updatedRecipe);
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 const getRecipes = async (req: Request, res: Response, next: NextFunction) => {
@@ -88,6 +98,7 @@ const getRecipes = async (req: Request, res: Response, next: NextFunction) => {
       user: recipe.userId, // Assign userId to user
     }));
 
+    console.log("sadas", modifiedRecipes);
     return res.status(200).json(modifiedRecipes);
   } catch (error) {
     return next(error);
@@ -164,6 +175,26 @@ const getSelfRecipes = async (
     return next(error);
   }
 };
+const deleteRecipe = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const recipe = await Recipe.findOneAndDelete({
+      userId: req.user?.userId,
+      _id: req.params.id,
+    });
+
+    if (!recipe) {
+      return res.status(400).json({ messsage: "No recipe in Id provided!" });
+    }
+    return res.status(200).json({ message: "Delete Successfully. " });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const RecipeController = {
   updateRecipe,
   getRecipes,
@@ -171,6 +202,7 @@ const RecipeController = {
   searchRecipeId,
   postRecipe,
   getSelfRecipes,
+  deleteRecipe,
 };
 
 export default RecipeController;

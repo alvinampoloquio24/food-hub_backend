@@ -25,6 +25,11 @@ router.get("/getSelfRecipes", auth, RecipeController.getSelfRecipes);
 router.get("/getRecipeByName", RecipeController.searchRecipeByName);
 router.get("/findRecipeId/:id", RecipeController.searchRecipeId);
 router.get("/findRecipeSpoonacular/:id", getRecipeInformation);
-router.patch("/updateRecipe/:id", RecipeController.updateRecipe);
-
+router.post(
+  "/editRecipe/:id",
+  auth,
+  upload.single("image"),
+  RecipeController.updateRecipe
+);
+router.delete("/deleteRecipe/:id", auth, RecipeController.deleteRecipe);
 export default router;

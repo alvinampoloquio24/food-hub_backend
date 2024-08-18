@@ -102,11 +102,24 @@ const updateUser = async (
     }
 
     let updateData = { ...req.body };
+    // Ensure req.files is typed properly
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    if (req.file) {
-      // Upload image to Cloudinary
-      const result = await cloudinary.uploader.upload(req.file.path);
-      updateData.profile = result.secure_url;
+    // Check if there is a profile photo file and upload it
+    if (files?.profile && files.profile.length > 0) {
+      console.log("profile");
+      const profileResult = await cloudinary.uploader.upload(
+        files.profile[0].path
+      );
+      updateData.profile = profileResult.secure_url;
+    }
+
+    // Check if there is a cover photo file and upload it
+    if (files?.coverPhoto && files.coverPhoto.length > 0) {
+      const coverPhoto = await cloudinary.uploader.upload(
+        files.coverPhoto[0].path
+      );
+      updateData.coverPhoto = coverPhoto.secure_url;
     }
 
     const user = await User.findByIdAndUpdate(id, updateData, { new: true });
@@ -120,6 +133,7 @@ const updateUser = async (
     return next(error);
   }
 };
+
 const getUser = async (
   req: AuthenticatedRequest,
   res: Response,
