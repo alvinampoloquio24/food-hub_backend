@@ -22,6 +22,7 @@ const authMiddleware = (
 
     next();
   } catch (error) {
+    console.log(error, "sadsad");
     res.status(401).json({ error: "Invalid token" });
   }
 };
