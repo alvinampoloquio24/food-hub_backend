@@ -76,7 +76,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     if (!user || user.verified == false) {
       return res.status(400).json({ message: "Wrong creadentils. " });
     }
-    const isMatch = user.comparePassword(req.body.password);
+    const isMatch = await user.comparePassword(req.body.password);
+
     if (!isMatch) {
       return res.status(400).json({ message: "Wrong creadentils. " });
     }
