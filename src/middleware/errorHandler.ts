@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { TokenExpiredError } from "jsonwebtoken";
+import { MulterError } from "multer";
 
 interface CustomError extends Error {
   status?: number;
@@ -39,6 +39,10 @@ const errorHandler = (
     error.status = 400; // Bad Request
   }
 
+  // Handling custom file filter errors (e.g., unsupported file types)
+  else if (error.message === "File type not supported") {
+    error.status = 400; // Bad Request
+  }
   // Final error response
   const errMessage = error.message || "Something went wrong";
   const errStatus = error.status || 500; // Internal Server Error as a default

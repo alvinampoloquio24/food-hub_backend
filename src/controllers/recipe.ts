@@ -9,10 +9,10 @@ interface AuthenticatedRequest extends Request {
     userId: string;
   };
 }
+
 const postRecipe = async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.file) {
-      console.log("no file");
       return res.status(400).json({ message: "No file uploaded" });
     }
 
@@ -46,7 +46,6 @@ const postRecipe = async (req: AuthenticatedRequest, res: Response) => {
       userId: req.user?.userId,
     });
 
-    console.log("asd");
     return res.status(201).json(recipe);
   } catch (error) {
     console.error("Error creating recipe:", error);
@@ -137,7 +136,7 @@ const searchRecipeByName = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-const searchRecipeId = async (req: Request, res: Response) => {
+const searchRecipeId = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = req.params.id;
 
@@ -156,6 +155,7 @@ const getSelfRecipes = async (
   next: NextFunction
 ) => {
   try {
+    console.log(req.user?.userId);
     const recipes = await Recipe.find({ userId: req.user?.userId })
       .sort({ createdAt: -1 })
       .populate({

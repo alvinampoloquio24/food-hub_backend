@@ -13,7 +13,6 @@ interface Recipe {
 
 const getRecipes = async (ingredients: string[]): Promise<Recipe[]> => {
   try {
-    console.log(apiKey, "asdsad");
     const response = await axios.get(`${baseURL}/recipes/findByIngredients`, {
       params: {
         ingredients: ingredients.join(","),

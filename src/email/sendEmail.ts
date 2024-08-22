@@ -71,7 +71,6 @@ The FoodHub Team`,
 
   try {
     let info = await transporter.sendMail(mailOptions);
-    console.log("Verification email sent successfully");
   } catch (err) {
     console.error("Error occurred while sending verification email:", err);
     throw err;

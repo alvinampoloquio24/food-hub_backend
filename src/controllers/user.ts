@@ -55,7 +55,6 @@ const verifyEmailToken = async (
         .json({ message: "No account linked to this token." });
     }
 
-    console.log(user);
     await User.findByIdAndUpdate(
       user?._id,
       {
@@ -116,12 +115,14 @@ const updateUser = async (
 
     // Check if there is a cover photo file and upload it
     if (files?.coverPhoto && files.coverPhoto.length > 0) {
+      console.log("cover");
       const coverPhoto = await cloudinary.uploader.upload(
         files.coverPhoto[0].path
       );
       updateData.coverPhoto = coverPhoto.secure_url;
     }
 
+    console.log(updateData.coverPhoto, updateData.profile);
     const user = await User.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!user) {
@@ -147,12 +148,26 @@ const getUser = async (
     return next(error);
   }
 };
-
+const deleteUser = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!(await User.findByIdAndDelete(req.user?.userId))) {
+      return res.status(400).json({ message: "No user this Id. " });
+    }
+    return res.status(200).json({ message: "Delete Succesfully" });
+  } catch (error) {
+    return next(error);
+  }
+};
 const UserController = {
   createAccount,
   verifyEmailToken,
   login,
   updateUser,
   getUser,
+  deleteUser,
 };
 export default UserController;

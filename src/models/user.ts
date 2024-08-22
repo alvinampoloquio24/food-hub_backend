@@ -34,11 +34,12 @@ const userSchema: Schema = new Schema(
     },
     profile: {
       type: String,
-      default: null,
+      default:
+        "https://cdn.dribbble.com/users/77598/screenshots/15211765/dribbble1.png",
     },
     coverPhoto: {
       type: String,
-      defalut:
+      default:
         "https://cdn.pixabay.com/photo/2017/08/05/12/33/flat-lay-2583213_1280.jpg",
     },
   },
