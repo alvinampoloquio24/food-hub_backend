@@ -106,7 +106,6 @@ const updateUser = async (
 
     // Check if there is a profile photo file and upload it
     if (files?.profile && files.profile.length > 0) {
-      console.log("profile");
       const profileResult = await cloudinary.uploader.upload(
         files.profile[0].path
       );
@@ -115,14 +114,12 @@ const updateUser = async (
 
     // Check if there is a cover photo file and upload it
     if (files?.coverPhoto && files.coverPhoto.length > 0) {
-      console.log("cover");
       const coverPhoto = await cloudinary.uploader.upload(
         files.coverPhoto[0].path
       );
       updateData.coverPhoto = coverPhoto.secure_url;
     }
 
-    console.log(updateData.coverPhoto, updateData.profile);
     const user = await User.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!user) {

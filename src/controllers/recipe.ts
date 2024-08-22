@@ -97,7 +97,6 @@ const getRecipes = async (req: Request, res: Response, next: NextFunction) => {
       user: recipe.userId, // Assign userId to user
     }));
 
-    console.log("sadas", modifiedRecipes);
     return res.status(200).json(modifiedRecipes);
   } catch (error) {
     return next(error);
@@ -155,7 +154,6 @@ const getSelfRecipes = async (
   next: NextFunction
 ) => {
   try {
-    console.log(req.user?.userId);
     const recipes = await Recipe.find({ userId: req.user?.userId })
       .sort({ createdAt: -1 })
       .populate({
