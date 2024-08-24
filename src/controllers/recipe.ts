@@ -192,9 +192,49 @@ const deleteRecipe = async (
     return next(error);
   }
 };
+const getRecipesPages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const pageNumber = parseInt(page as string, 10);
+    const limitNumber = parseInt(limit as string, 10);
+
+    const recipes = await Recipe.find()
+      .sort({ createdAt: -1 })
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber)
+      .populate({
+        path: "userId",
+        select: "name profile -_id",
+        model: "User",
+      })
+      .lean()
+      .exec();
+
+    const totalRecipes = await Recipe.countDocuments();
+    const hasMore = pageNumber * limitNumber < totalRecipes;
+
+    const modifiedRecipes = recipes.map((recipe) => ({
+      ...recipe,
+      user: recipe.userId, // Assign userId to user
+    }));
+
+    return res.status(200).json({
+      items: modifiedRecipes,
+      hasMore,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
 
 const RecipeController = {
   updateRecipe,
+  getRecipesPages,
   getRecipes,
   searchRecipeByName,
   searchRecipeId,

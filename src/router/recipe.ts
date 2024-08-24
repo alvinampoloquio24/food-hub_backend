@@ -21,6 +21,7 @@ router.post(
 router.post("/getGeneratedRecipe", getGeneratedRecipe);
 router.get("/getArticles", getArticle);
 router.get("/getRecipes", RecipeController.getRecipes);
+router.get("/getRecipesPages", RecipeController.getRecipesPages);
 router.get("/getSelfRecipes", auth, RecipeController.getSelfRecipes);
 router.get("/getRecipeByName", RecipeController.searchRecipeByName);
 router.get("/findRecipeId/:id", RecipeController.searchRecipeId);
