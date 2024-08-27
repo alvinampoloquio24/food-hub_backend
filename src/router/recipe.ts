@@ -20,17 +20,25 @@ router.post(
 );
 router.post("/getGeneratedRecipe", getGeneratedRecipe);
 router.get("/getArticles", getArticle);
+router.get("/getTrendRecipes", RecipeController.getTrendRecipes);
 router.get("/getRecipes", RecipeController.getRecipes);
-router.get("/getRecipesPages", RecipeController.getRecipesPages);
+router.get("/getRecipesPages", auth, RecipeController.getRecipesPages);
 router.get("/getSelfRecipes", auth, RecipeController.getSelfRecipes);
 router.get("/getRecipeByName", RecipeController.searchRecipeByName);
 router.get("/findRecipeId/:id", RecipeController.searchRecipeId);
 router.get("/findRecipeSpoonacular/:id", getRecipeInformation);
+router.post("/savedRecipe/:id", auth, RecipeController.savedRecipe);
 router.post(
   "/editRecipe/:id",
   auth,
   upload.single("image"),
   RecipeController.updateRecipe
 );
+router.get("/getSavedRecipes", auth, RecipeController.getSavedRecipes);
 router.delete("/deleteRecipe/:id", auth, RecipeController.deleteRecipe);
+router.delete(
+  "/deleteSavedRecipe/:id",
+  auth,
+  RecipeController.deleteSavedRecipe
+);
 export default router;
