@@ -51,26 +51,74 @@ Bon appétit!
 The FoodHub Team`,
 
     html: `
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #FFFFFF; border: 2px solid #FF6347; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-      <h2 style="text-align: center; font-size: 28px; color: #FF6347; margin-bottom: 20px;">Welcome to FoodHub, ${username}!</h2>
-      <p style="font-size: 18px; color: #333333; text-align: left;">We're excited to have you join our community of food enthusiasts.</p>
-      <p style="font-size: 18px; color: #333333; text-align: left;">Your account has been created, but we need to verify your email address. Please click the button below to verify your email:</p>
-      <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
-        <a href="${verificationLink}" style="background-color: #FF6347; color: white; padding: 14px 28px; text-decoration: none; font-size: 18px; border-radius: 5px;">Verify Your Email</a>
-      </div>
-      <p style="font-size: 16px; color: #666666; text-align: left;">If the button doesn't work, you can copy and paste this link into your browser:</p>
-      <p style="font-size: 14px; color: #0000FF; text-align: left;">${verificationLink}</p>
-      <p style="font-size: 16px; color: #666666; text-align: left;">If you didn't create an account with FoodHub, please ignore this email.</p>
-      <p style="font-size: 18px; color: #333333; text-align: left;">Once your email is verified, you can start exploring our wide range of culinary delights, share your favorite recipes, and connect with other food lovers.</p>
-      <p style="font-size: 18px; color: #333333; text-align: left;">If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
-      <p style="text-align: center; margin-top: 30px; color: #FF6347; font-size: 20px;">Bon appétit!</p>
-      <p style="text-align: center; color: #333333; font-size: 16px;">The FoodHub Team</p>
-    </div>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Welcome to FoodHub</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+      <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td align="center" style="padding: 40px 0;">
+            <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+              <!-- Header -->
+              <tr>
+                <td style="padding: 40px 30px; text-align: center; background-color: #FF6347; border-radius: 8px 8px 0 0;">
+                  <h1 style="color: #ffffff; font-size: 28px; margin: 0;">Welcome to FoodHub</h1>
+                </td>
+              </tr>
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <p style="font-size: 18px; color: #333333; margin-bottom: 20px;">Hello ${username},</p>
+                  <p style="font-size: 16px; color: #666666; line-height: 1.5; margin-bottom: 20px;">We're thrilled to have you join our community of food enthusiasts! Your account has been created, but we need to verify your email address to get you started.</p>
+                  <table role="presentation" style="margin: 30px auto;">
+                    <tr>
+                      <td style="border-radius: 4px; background-color: #FF6347;">
+                        <a href="${verificationLink}" style="display: inline-block; padding: 14px 30px; color: #ffffff; text-decoration: none; font-size: 18px;">Verify Your Email</a>
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="font-size: 14px; color: #999999; margin-bottom: 20px;">If the button doesn't work, copy and paste this link into your browser:</p>
+                  <p style="font-size: 14px; color: #0066cc; margin-bottom: 20px;">${verificationLink}</p>
+                  <p style="font-size: 16px; color: #666666; line-height: 1.5; margin-bottom: 20px;">Once verified, you can start exploring our wide range of culinary delights, share your favorite recipes, and connect with other food lovers.</p>
+                  <p style="font-size: 16px; color: #666666; line-height: 1.5;">If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+                </td>
+              </tr>
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px; text-align: center; background-color: #f8f8f8; border-radius: 0 0 8px 8px;">
+                  <p style="margin: 0; font-size: 16px; color: #999999;">Bon appétit!</p>
+                  <p style="margin: 10px 0 0; font-size: 16px; color: #999999;">The FoodHub Team</p>
+                  <table role="presentation" style="margin-top: 20px;">
+                    <tr>
+                      <td style="padding: 0 10px;">
+                        <a href="#" style="color: #999999; font-size: 20px;">📘</a>
+                      </td>
+                      <td style="padding: 0 10px;">
+                        <a href="#" style="color: #999999; font-size: 20px;">📸</a>
+                      </td>
+                      <td style="padding: 0 10px;">
+                        <a href="#" style="color: #999999; font-size: 20px;">🐦</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
     `,
   };
 
   try {
     let info = await transporter.sendMail(mailOptions);
+    console.log("Verification email sent successfully");
   } catch (err) {
     console.error("Error occurred while sending verification email:", err);
     throw err;
