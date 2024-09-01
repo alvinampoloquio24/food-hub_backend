@@ -129,10 +129,15 @@ const searchRecipeByName = async (req: Request, res: Response) => {
     }
 
     // Create a case-insensitive regex pattern
-    const nameRegex = new RegExp(name, "i");
+    const searchRegex = new RegExp(name, "i");
 
-    // Use the regex in the find query
-    const recipes = await Recipe.find({ name: { $regex: nameRegex } })
+    // Find recipes where the name or description matches the regex pattern
+    const recipes = await Recipe.find({
+      $or: [
+        { name: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } },
+      ],
+    })
       .populate({
         path: "userId",
         select: "name profile -_id",
@@ -140,9 +145,11 @@ const searchRecipeByName = async (req: Request, res: Response) => {
       })
       .lean()
       .exec();
+
+    // Map over recipes to include user information directly
     const modifiedRecipes = recipes.map((recipe) => ({
       ...recipe,
-      user: recipe.userId, // Assign userId to user
+      user: recipe.userId, // Assign populated user data to 'user'
     }));
 
     return res.status(200).json(modifiedRecipes);
@@ -151,6 +158,7 @@ const searchRecipeByName = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 const searchRecipeId = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = req.params.id;
@@ -252,14 +260,13 @@ const getRecipesPages = async (
   next: NextFunction
 ) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 5 } = req.query;
 
     const pageNumber = parseInt(page as string, 10);
     const limitNumber = parseInt(limit as string, 10);
 
     // Fetch recipes with pagination and populate user details
     const recipes = await Recipe.find()
-      .sort({ createdAt: -1 })
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber)
       .populate({
